@@ -43,6 +43,7 @@ Bundle 'nacitar/terminalkeys.vim'
 
 filetype on
 filetype plugin indent on
+syntax on
 
 " Set clipboard settings, so selections automatically go to primary, and
 " yanking puts things in secondary _and_ primary.
