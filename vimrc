@@ -167,45 +167,53 @@ function! SetTitle(window,pane)
 endfunction
 
 function! PathShortenTail(pathstr)
-	return substitute(pathshorten(a:pathstr),"^[^~]","/&","")
-	" shorten the path, and prepend a / if not starting with ~
+	return substitute(pathshorten(a:pathstr),"^[^~/]","/&","")
+	" shorten the path, and prepend a / if not starting with ~ or / already
 	"return substitute(substitute(pathshorten(a:pathstr . "/."),"/.$","",""),"^[^~]","/&","")
 endfunction
 " Set custom title that matches vim's default title
 function! SetCustomTitle()
-	let reldirname = expand("%:~")
+	let dirname = expand("%:p:~")
 	" don't update it again needlessly
 	if exists('g:last_title_dir')
-		if reldirname == g:last_title_dir
+		if dirname == g:last_title_dir
 			return
 		endif
 	endif
-	let g:last_title_dir = reldirname
+	let g:last_title_dir = dirname
 
 	" Check for the no-file case
 	let filename = "[No Name]"
-	if reldirname != ""
+	if dirname != ""
 		" split it, get the filename, remove the filename, put it back
-		let splitdir = split(reldirname,'/')
+		let splitdir = split(dirname,'/')
+		" we want the empty token before /, too
+		if dirname[0] == '/'
+			let splitdir = [''] + splitdir
+		endif
 		let splitlen = len(splitdir)
 		if splitlen == 1
-			let reldirname = splitdir[-1]
+			" either ~ or /
+			let dirname = dirname[0]
 			let filename = '.'
 		elseif splitlen > 1
 			let filename = splitdir[-1]
 			call remove(splitdir,-1)
-			let reldirname = join(splitdir,'/')
+			let dirname = join(splitdir,'/')
+			if dirname == ""
+				let dirname = '/'
+			endif
 		else
-			let reldirname = ""
+			let dirname = ""
 		endif
 	endif
 
 	let panetitle = filename
 	let windowtitle = panetitle
-	if reldirname != ""
-		let panetitle = panetitle . " (" . reldirname . ")"
+	if dirname != ""
+		let panetitle = panetitle . " (" . dirname . ")"
 		" shorten path for window title only
-		let windowtitle = windowtitle . " (" . PathShortenTail(reldirname) . ")"
+		let windowtitle = windowtitle . " (" . PathShortenTail(dirname) . ")"
 	endif
 	" If remote, add the hostname
 	if $SSH_CLIENT != ""
