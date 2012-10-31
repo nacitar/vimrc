@@ -41,6 +41,9 @@ Bundle 'nacitar/terminalkeys.vim'
 
 """""""""""""""""" END OF VUNDLE CONFIGURATION
 
+" Make a.vim only match exact filenames, not buffers of the same basename
+let g:strictAlternateMatching = 1
+
 filetype on
 filetype plugin indent on
 syntax on
