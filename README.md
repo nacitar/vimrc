@@ -7,9 +7,8 @@ My vimrc configuration
 installation
 ============
 
-git clone --recursive git://github.com/nacitar/vimrc.git "$HOME/.vim"
-
-	"~/.vim/install.sh"
+    git clone --recursive git://github.com/nacitar/vimrc.git "$HOME/.vim"
+	"$HOME/.vim/install.sh"
 
 NOTE: this WILL overwrite any existing vimrc!
 
