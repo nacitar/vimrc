@@ -322,6 +322,9 @@ map <M-ScrollWheelDown> <Down>
 if $USER == "root"
 	" TODO: make this get the home directory
 	let $tmp = "/root"
-	source $tmp/.vimrc
+	let $root_vimrc = $tmp . "/.vimrc"
+	if filereadable($root_vimrc)
+		source $root_vimrc
+	endif
 endif
 
