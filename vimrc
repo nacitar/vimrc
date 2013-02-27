@@ -41,6 +41,9 @@ Bundle 'nacitar/terminalkeys.vim'
 
 """""""""""""""""" END OF VUNDLE CONFIGURATION
 
+" Get rid of delays when pressing escape to change modes
+set timeoutlen=1000 ttimeoutlen=-1
+
 " Make a.vim only match exact filenames, not buffers of the same basename
 let g:strictAlternateMatching = 1
 
