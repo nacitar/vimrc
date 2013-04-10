@@ -29,8 +29,10 @@ Bundle 'gmarik/vundle'
 Bundle 'nacitar/a.vim'
 Bundle 'vim-scripts/SudoEdit.vim'
 Bundle 'vim-scripts/vcscommand.vim'
+Bundle 'vim-scripts/taglist.vim'
+Bundle 'vim-scripts/Cpp11-Syntax-Support'
 " desired complete github repos
-"Bundle 'scrooloose/nerdtree'
+Bundle 'scrooloose/nerdtree'
 "Bundle 'jistr/vim-nerdtree-tabs'
 
 " repos we don't want every plugin from
@@ -42,7 +44,7 @@ Bundle 'nacitar/terminalkeys.vim'
 """""""""""""""""" END OF VUNDLE CONFIGURATION
 
 " Get rid of delays when pressing escape to change modes
-set timeoutlen=1000 ttimeoutlen=-1
+"set timeoutlen=1000 ttimeoutlen=-1
 
 " Make a.vim only match exact filenames, not buffers of the same basename
 let g:strictAlternateMatching = 1
@@ -50,6 +52,9 @@ let g:strictAlternateMatching = 1
 filetype on
 filetype plugin indent on
 syntax on
+
+" Assumes Cpp11-Syntax-Support is installed
+au! BufRead,BufNewFile *.cpp,*.h,*.hpp set filetype=cpp11
 
 " Set clipboard settings, so selections automatically go to primary, and
 " yanking puts things in secondary _and_ primary.
@@ -118,9 +123,34 @@ set smartcase
 " When searching, scroll to the next search pattern automatically with 7+ lines visible above and below the cursor
 set scrolloff=7
 
-" Four spaces per tab
-set tabstop=4
-set shiftwidth=4
+" Four spaces per tab, with spaces
+function! SetPersonal()
+    set tabstop=2
+    set softtabstop=2
+    set shiftwidth=2
+    set expandtab " prefer spaces for indentation
+    set cc=81
+    set tw=79
+	" Show lines over 80 chars in red
+	match ErrorMsg /\%>80v.\+/
+endfunction
+" Four spaces per tab, with tabs
+function! SetWork()
+    set tabstop=4
+    set softtabstop=4
+    set shiftwidth=4
+    set noexpandtab " prefer tabs
+    set cc=
+    set tw=0
+	" Don't show lines over 80 chars in red
+	match none /\%>80v.\+/
+endfunction
+
+" Default to personal settings
+call SetPersonal()
+
+" Enable ctags
+set tags=./tags;/
 
 " To filter a colors file for cgdbrc
 "	cat colors.vim | sed -n 's/^:hi[[:space:]]\+\(Normal\|Statement\|Type\|Constant\|Comment\|PreProc\|StatusLine\|IncSearch\)[[:space:]]\+/hi \1 /p' | sed 's/gui[^=]*=[^[:space:]]*//g'
@@ -292,9 +322,9 @@ imap <C-S-Down> <Esc>:co .<Enter>gi<Down>
 vmap <C-S-Down> :co .-1<Enter>gv
 
 " Change tab left/right (Both alt and control versions, in case your terminal supports control)
-" vim already does ctrl-pgup/down
-"nmap <silent> <C-PageUp> :tabp<Enter>
-"nmap <silent> <C-PageDown> :tabn<Enter>
+" vim already does ctrl-pgup/down, but only in normal mode
+"map <silent> <C-PageUp> :tabp<Enter>
+"map <silent> <C-PageDown> :tabn<Enter>
 nmap <silent> <A-PageUp> <C-PageUp>
 nmap <silent> <A-PageDown> <C-PageDown>
 " Move tab left/right
@@ -320,6 +350,10 @@ map <ScrollWheelDown>   3<Down>
 map <M-ScrollWheelUp>   <Up>
 map <M-ScrollWheelDown> <Down>
 
+" Toggle NERDTree
+nmap <C-L> <ESC>:NERDTreeToggle<CR>
+" Toggle taglist
+nmap <C-K> <ESC>:TlistToggle<CR>
 
 " Call root vimrc if root
 if $USER == "root"
