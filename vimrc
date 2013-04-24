@@ -31,6 +31,7 @@ Bundle 'vim-scripts/SudoEdit.vim'
 Bundle 'vim-scripts/vcscommand.vim'
 Bundle 'vim-scripts/taglist.vim'
 Bundle 'vim-scripts/Cpp11-Syntax-Support'
+Bundle 'tpope/vim-fugitive'
 " desired complete github repos
 Bundle 'scrooloose/nerdtree'
 "Bundle 'jistr/vim-nerdtree-tabs'
@@ -54,6 +55,7 @@ filetype plugin indent on
 syntax on
 
 " Assumes Cpp11-Syntax-Support is installed
+" NOTE: setlocal for just that buffer
 au! BufRead,BufNewFile *.cpp,*.h,*.hpp set filetype=cpp11
 
 " Set clipboard settings, so selections automatically go to primary, and
