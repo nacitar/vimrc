@@ -39,7 +39,7 @@ Bundle 'scrooloose/nerdtree'
 " repos we don't want every plugin from
 "BundleNoRTP 'godlygeek/vim-files'
 " Specific plugins from repos
-"BundleSourceFile "vim-files/plugin/terminalkeys.vim"
+"BundleSourceFile 'vim-files/plugin/terminalkeys.vim'
 Bundle 'nacitar/terminalkeys.vim'
 
 """""""""""""""""" END OF VUNDLE CONFIGURATION
@@ -53,10 +53,12 @@ let g:strictAlternateMatching = 1
 filetype on
 filetype plugin indent on
 syntax on
+" syntax highlighting can be slow for really long lines; this fixes it.
+set synmaxcol=300
 
 " Assumes Cpp11-Syntax-Support is installed
 " NOTE: setlocal for just that buffer
-au! BufRead,BufNewFile *.cpp,*.h,*.hpp set filetype=cpp11
+au! BufRead,BufNewFile *.cc,*.cpp,*.h,*.hpp set filetype=cpp11
 
 " Set clipboard settings, so selections automatically go to primary, and
 " yanking puts things in secondary _and_ primary.
@@ -125,16 +127,32 @@ set smartcase
 " When searching, scroll to the next search pattern automatically with 7+ lines visible above and below the cursor
 set scrolloff=7
 
+
+
+let g:matchOver80 = '\%>80v.\+'
+let g:matchTrailingWS = '\s\+$'
+let g:matchOver80AndTrail = '\('.g:matchOver80.'\|'.g:matchTrailingWS.'\)'
+
+function! Set80Col()
+    set cc=81
+    set tw=79
+    " Show lines over 80 chars in red
+    :execute ':match ErrorMsg /' . g:matchOver80AndTrail . '/'
+endfunction
+function! SetAnyCol()
+    set cc=
+    set tw=0
+    " Don't show lines over 80 chars in red
+    :match None g:matchOver80AndTrail
+endfunction
+
 " Four spaces per tab, with spaces
 function! SetPersonal()
     set tabstop=2
     set softtabstop=2
     set shiftwidth=2
     set expandtab " prefer spaces for indentation
-    set cc=81
-    set tw=79
-	" Show lines over 80 chars in red
-	match ErrorMsg /\%>80v.\+/
+	call Set80Col()
 endfunction
 " Four spaces per tab, with tabs
 function! SetWork()
@@ -142,14 +160,12 @@ function! SetWork()
     set softtabstop=4
     set shiftwidth=4
     set noexpandtab " prefer tabs
-    set cc=
-    set tw=0
-	" Don't show lines over 80 chars in red
-	match none /\%>80v.\+/
+	call SetAnyCol()
 endfunction
 
 " Default to personal settings
 call SetPersonal()
+"call SetWork()
 
 " Enable ctags
 set tags=./tags;/
