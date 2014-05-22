@@ -10,15 +10,15 @@ call vundle#rc()
 
 " add vundle helper function
 function! BundleNoRTP(githubrepo)
-	let temprtp = &rtp 
-	execute "Bundle '".a:githubrepo."'"
-	execute "set rtp=".temprtp
+  let temprtp = &rtp
+  execute "Bundle '".a:githubrepo."'"
+  execute "set rtp=".temprtp
 endfunction
 com! -nargs=+ BundleNoRTP
 \ call BundleNoRTP(<args>)
 
 function! BundleSourceFile(file)
-	execute "source ".g:vundle_root.a:file
+  execute "source ".g:vundle_root.a:file
 endfunction!
 com! -nargs=+ BundleSourceFile
 \ call BundleSourceFile(<args>)
@@ -64,7 +64,7 @@ au! BufRead,BufNewFile *.cc,*.cpp,*.h,*.hpp set filetype=cpp11
 " yanking puts things in secondary _and_ primary.
 set clipboard=autoselect,unnamed
 if has('unnamedplus')
-	set clipboard+=unnamedplus
+  set clipboard+=unnamedplus
 endif
 
 " Support mouse input
@@ -72,10 +72,10 @@ set mouse=a
 set ttymouse=xterm2
 
 if &term == "rxvt-unicode-256color"
-	" assume we're using the mwheel perl addition to handle scrolling as
-	" 3-arrow-key presses, so disable builtin mouse support
-	map <mousedown> <nop>
-	map <mouseup> <nop>
+  " assume we're using the mwheel perl addition to handle scrolling as
+  " 3-arrow-key presses, so disable builtin mouse support
+  map <mousedown> <nop>
+  map <mouseup> <nop>
 endif
 
 " If using meta8, this will fix alt-hotkeys.
@@ -108,12 +108,12 @@ set foldcolumn=0
 set foldlevelstart=99
 
 if has('gui_running')
-	set guifont=Monospace\ 10
+  set guifont=Monospace\ 10
 else
-	" Enable 256 colors
-	if $TERM =~ '256color'
-		set t_Co=256 
-	endif
+  " Enable 256 colors
+  if $TERM =~ '256color'
+    set t_Co=256 
+  endif
 endif
 
 " Highlight matched search results; you can turn off active highlighting with :noh
@@ -152,7 +152,7 @@ function! SetPersonal()
     set softtabstop=2
     set shiftwidth=2
     set expandtab " prefer spaces for indentation
-	call Set80Col()
+    call Set80Col()
 endfunction
 " Four spaces per tab, with tabs
 function! SetWork()
@@ -160,7 +160,7 @@ function! SetWork()
     set softtabstop=4
     set shiftwidth=4
     set noexpandtab " prefer tabs
-	call SetAnyCol()
+    call SetAnyCol()
 endfunction
 
 " Default to personal settings
@@ -171,7 +171,7 @@ call SetPersonal()
 set tags=./tags;/
 
 " To filter a colors file for cgdbrc
-"	cat colors.vim | sed -n 's/^:hi[[:space:]]\+\(Normal\|Statement\|Type\|Constant\|Comment\|PreProc\|StatusLine\|IncSearch\)[[:space:]]\+/hi \1 /p' | sed 's/gui[^=]*=[^[:space:]]*//g'
+" cat colors.vim | sed -n 's/^:hi[[:space:]]\+\(Normal\|Statement\|Type\|Constant\|Comment\|PreProc\|StatusLine\|IncSearch\)[[:space:]]\+/hi \1 /p' | sed 's/gui[^=]*=[^[:space:]]*//g'
 " Then just adjust the cterm= parts to set the normal states to match, as it doesn't inherit it.
 "
 " Choose our color scheme
@@ -203,80 +203,80 @@ endfunction
 
 " Parameters use tmux's terminology
 function! SetTitle(window,pane)
-	if match(&term,'^screen\($\|-.*$\)') == 0
-		" as a hack, add the window name part to ts, so both get set
-		if a:window != ""
-			let &t_ts = "\ek".a:window."\e\\"
-		endif
-		" pane title prefix
-		let &t_ts .= "\e]2"
-		let &t_fs = "\e\\"
+  if match(&term,'^screen\($\|-.*$\)') == 0
+    " as a hack, add the window name part to ts, so both get set
+    if a:window != ""
+      let &t_ts = "\ek".a:window."\e\\"
+    endif
+    " pane title prefix
+    let &t_ts .= "\e]2"
+    let &t_fs = "\e\\"
 
-		" trigger the set
-		let &titlestring = a:pane
-	else
-		let &titlestring = a:pane
-	endif
+    " trigger the set
+    let &titlestring = a:pane
+  else
+    let &titlestring = a:pane
+  endif
 
 endfunction
 
 function! PathShortenTail(pathstr)
-	return substitute(pathshorten(a:pathstr),"^[^~/]","/&","")
-	" shorten the path, and prepend a / if not starting with ~ or / already
-	"return substitute(substitute(pathshorten(a:pathstr . "/."),"/.$","",""),"^[^~]","/&","")
+  return substitute(pathshorten(a:pathstr),"^[^~/]","/&","")
+  " shorten the path, and prepend a / if not starting with ~ or / already
+  "return substitute(substitute(pathshorten(a:pathstr . "/."),"/.$","",""),"^[^~]","/&","")
 endfunction
 " Set custom title that matches vim's default title
 function! SetCustomTitle()
-	let dirname = expand("%:p:~")
-	" don't update it again needlessly
-	if exists('g:last_title_dir')
-		if dirname == g:last_title_dir
-			return
-		endif
-	endif
-	let g:last_title_dir = dirname
+  let dirname = expand("%:p:~")
+  " don't update it again needlessly
+  if exists('g:last_title_dir')
+    if dirname == g:last_title_dir
+      return
+    endif
+  endif
+  let g:last_title_dir = dirname
 
-	" Check for the no-file case
-	let filename = "[No Name]"
-	if dirname != ""
-		" split it, get the filename, remove the filename, put it back
-		let splitdir = split(dirname,'/')
-		" we want the empty token before /, too
-		if dirname[0] == '/'
-			let splitdir = [''] + splitdir
-		endif
-		let splitlen = len(splitdir)
-		if splitlen == 1
-			" either ~ or /
-			let dirname = dirname[0]
-			let filename = '.'
-		elseif splitlen > 1
-			let filename = splitdir[-1]
-			call remove(splitdir,-1)
-			let dirname = join(splitdir,'/')
-			if dirname == ""
-				let dirname = '/'
-			endif
-		else
-			let dirname = ""
-		endif
-	endif
+  " Check for the no-file case
+  let filename = "[No Name]"
+  if dirname != ""
+    " split it, get the filename, remove the filename, put it back
+    let splitdir = split(dirname,'/')
+    " we want the empty token before /, too
+    if dirname[0] == '/'
+      let splitdir = [''] + splitdir
+    endif
+    let splitlen = len(splitdir)
+    if splitlen == 1
+      " either ~ or /
+      let dirname = dirname[0]
+      let filename = '.'
+    elseif splitlen > 1
+      let filename = splitdir[-1]
+      call remove(splitdir,-1)
+      let dirname = join(splitdir,'/')
+      if dirname == ""
+        let dirname = '/'
+      endif
+    else
+      let dirname = ""
+    endif
+  endif
 
-	let panetitle = filename
-	let windowtitle = panetitle
-	if dirname != ""
-		let panetitle = panetitle . " (" . dirname . ")"
-		" shorten path for window title only
-		let windowtitle = windowtitle . " (" . PathShortenTail(dirname) . ")"
-	endif
-	" If remote, add the hostname
-	if $SSH_CLIENT != ""
-		let prefix = split(hostname(),'\.')[0] . ": "
-		let panetitle = prefix . panetitle
-		let windowtitle = prefix . windowtitle
-	endif
-	" Set the window and pane titles, adding a suffix to the pane.
-	call SetTitle(windowtitle,panetitle . " - VIM")
+  let panetitle = filename
+  let windowtitle = panetitle
+  if dirname != ""
+    let panetitle = panetitle . " (" . dirname . ")"
+    " shorten path for window title only
+    let windowtitle = windowtitle . " (" . PathShortenTail(dirname) . ")"
+  endif
+  " If remote, add the hostname
+  if $SSH_CLIENT != ""
+    let prefix = split(hostname(),'\.')[0] . ": "
+    let panetitle = prefix . panetitle
+    let windowtitle = prefix . windowtitle
+  endif
+  " Set the window and pane titles, adding a suffix to the pane.
+  call SetTitle(windowtitle,panetitle . " - VIM")
 endfunction
 
 " Always show the statusline
@@ -375,11 +375,11 @@ nmap <C-K> <ESC>:TlistToggle<CR>
 
 " Call root vimrc if root
 if $USER == "root"
-	" TODO: make this get the home directory
-	let $tmp = "/root"
-	let $root_vimrc = $tmp . "/.vimrc"
-	if filereadable($root_vimrc)
-		source $root_vimrc
-	endif
+  " TODO: make this get the home directory
+  let $tmp = "/root"
+  let $root_vimrc = $tmp . "/.vimrc"
+  if filereadable($root_vimrc)
+    source $root_vimrc
+  endif
 endif
 
