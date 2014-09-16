@@ -44,6 +44,9 @@ Bundle 'nacitar/terminalkeys.vim'
 
 """""""""""""""""" END OF VUNDLE CONFIGURATION
 
+" Support Japanese Shift-JIS encoding
+set fileencodings=ucs-bom,utf-8,sjis,default,latin1
+
 " Get rid of delays when pressing escape to change modes
 "set timeoutlen=1000 ttimeoutlen=-1
 
