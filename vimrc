@@ -146,7 +146,7 @@ function! SetAnyCol()
     set cc=
     set tw=0
     " Don't show lines over 80 chars in red
-    :match None g:matchOver80AndTrail
+    :execute ':match None g:matchOver80AndTrail'
 endfunction
 
 " Four spaces per tab, with spaces
