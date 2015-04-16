@@ -59,10 +59,6 @@ syntax on
 " syntax highlighting can be slow for really long lines; this fixes it.
 set synmaxcol=300
 
-" Assumes Cpp11-Syntax-Support is installed
-" NOTE: setlocal for just that buffer
-au! BufRead,BufNewFile *.cc,*.cpp,*.h,*.hpp set filetype=cpp11
-
 " Set clipboard settings, so selections automatically go to primary, and
 " yanking puts things in secondary _and_ primary.
 set clipboard=autoselect,unnamed
@@ -115,7 +111,7 @@ if has('gui_running')
 else
   " Enable 256 colors
   if $TERM =~ '256color'
-    set t_Co=256 
+    set t_Co=256
   endif
 endif
 
@@ -126,49 +122,147 @@ set incsearch
 " Searches are case-insensitive if they contain all lowercase
 set ignorecase
 set smartcase
-
 " When searching, scroll to the next search pattern automatically with 7+ lines visible above and below the cursor
 set scrolloff=7
 
 
-
-let g:matchOver80 = '\%>80v.\+'
-let g:matchTrailingWS = '\s\+$'
-let g:matchOver80AndTrail = '\('.g:matchOver80.'\|'.g:matchTrailingWS.'\)'
-
-function! Set80Col()
-    set cc=81
-    set tw=79
-    " Show lines over 80 chars in red
-    :execute ':match ErrorMsg /' . g:matchOver80AndTrail . '/'
-endfunction
-function! SetAnyCol()
-    set cc=
-    set tw=0
-    " Don't show lines over 80 chars in red
-    :execute ':match None g:matchOver80AndTrail'
+function! StyleFunctionDefault(style)
 endfunction
 
-" Four spaces per tab, with spaces
-function! SetPersonal()
-    set tabstop=2
-    set softtabstop=2
-    set shiftwidth=2
-    set expandtab " prefer spaces for indentation
-    call Set80Col()
+" Default keys for the style
+let g:nxStyleBase_ = {'useSpace': -1, 'tabWidth': -1, 'columns': -1}
+" Style overrides
+let w:nxStyle_ = { }
+" A place to store custom styles
+let g:StyleFunction = function('StyleFunctionDefault')
+" Internal; used to keep up with previously applied match patterns
+let w:nxStyleMatch_ = ''
+
+function! StyleWindowInit_()
+  if !exists('w:nxStyle_')
+      let w:nxStyle_ = { }
+  endif
+  if !exists('w:nxStyleMatch_')
+      let w:nxStyleMatch_ = ''
+  endif
 endfunction
-" Four spaces per tab, with tabs
-function! SetWork()
-    set tabstop=4
-    set softtabstop=4
-    set shiftwidth=4
-    set noexpandtab " prefer tabs
-    call SetAnyCol()
+
+function! StyleApply()
+  call StyleWindowInit_()
+  " Copy, so we can modify it
+  let l:style = copy(g:nxStyleBase_)
+  " If a style function is specified, call it to get style values
+  if g:StyleFunction != function('StyleFunctionDefault')
+    call g:StyleFunction(l:style)
+  endif
+  " Include global overrides for values.
+  call extend(l:style, w:nxStyle_)
+  " General settings
+  if l:style.tabWidth != -1
+    let &tabstop = l:style.tabWidth
+    let &softtabstop = l:style.tabWidth
+    let &shiftwidth = l:style.tabWidth
+  endif
+  if l:style.useSpace != -1
+    if l:style.useSpace
+      set expandtab
+    else
+      set noexpandtab
+    endif
+  endif
+  " Apply new match/column settings
+  if l:style.columns != -1
+    " Remove any old match, if present.
+    if w:nxStyleMatch_ != ''
+      execute ':match None w:nxStyleMatch_'
+    endif
+    if l:style.columns
+      " Pattern to match lines that are too long
+      let l:matchTooLong = '\%>'.l:style.columns.'v.\+'
+      " Pattern to match trailing whitespace
+      let l:matchTrailingWS = '\s\+$'
+      " Set our match to both lines that are too long and trailing whitespace
+      let w:nxStyleMatch_ = '\('.l:matchTooLong.'\|'.l:matchTrailingWS.'\)'
+      execute ':match ErrorMsg /' . w:nxStyleMatch_ . '/'
+      let &cc = l:style.columns + 1
+      let &tw = l:style.columns - 1
+    else
+      let &cc = ''
+      let &tw = 0
+    endif
+  endif
 endfunction
+
+function! Style(key, value)
+  call StyleWindowInit_()
+  if has_key(g:nxStyleBase_, a:key)
+    if a:value == -1
+      " Remove the overrides if blank
+      if has_key(w:nxStyle_, a:key)
+        unlet w:nxStyle_[a:key]
+      endif
+    else
+      execute 'let w:nxStyle_.' . a:key . ' = a:value'
+    endif
+    call StyleApply()
+  endif
+endfunction
+
+function! StyleClear()
+  let w:nxStyle_ = {}
+  call StyleApply()
+endfunction
+
+" Apply settings any time the filetype changes
+au FileType * call StyleApply()
+
+""""""""""""""""""""""""""""""""""
+"""""""""" BELOW GOES INTO USER FILES
+""""""""""""""""""""""""""""""""""
+
+" Detect c++ files, including google-style extensions
+au BufRead,BufNewFile *.cc,*.cpp,*.h,*.hpp set filetype=cpp
+" Assume Cpp11-Syntax-Support is installed, and change cpp to cpp11
+au FileType cpp set filetype=cpp11
+
 
 " Default to personal settings
-call SetPersonal()
-"call SetWork()
+function! StyleMode(name)
+  if index(['personal', 'anycol', 'work'], a:name) >= 0
+    let w:styleMode = a:name
+    call StyleApply()
+  else
+    echoerr 'Unknown style mode: ' . a:name
+  endif
+endfunction
+function! StyleProvider(style)
+  if !exists('w:styleMode')
+    let w:styleMode = ''
+  endif
+  if w:styleMode == 'work'
+    call extend(a:style,
+        \{'useSpace': 0, 'tabWidth': 4, 'columns': 0})
+  elseif index(['personal', 'anycol'], w:styleMode) >= 0
+    let a:style.useSpace = 1
+    if &filetype == 'python'
+      let a:style.tabWidth = 4
+    else
+      let a:style.tabWidth = 2
+    endif
+    if w:styleMode == 'anycol'
+      let a:style.columns = 0
+    else
+      let a:style.columns = 80
+    endif
+  endif
+endfunction
+let g:StyleFunction = function('StyleProvider')
+call StyleMode('personal')
+"call StyleMode('work')
+
+""""""""""""""""""""""""""""""""""
+"""""""""" ABOVE GOES INTO USER FILES
+""""""""""""""""""""""""""""""""""
 
 " Enable ctags
 set tags=./tags;/
@@ -320,13 +414,13 @@ vmap <A-S-Up> :m-2<CR>gv=gv
 " <A-S-Right>
 nmap <A-S-Right> >>
 imap <A-S-Right> <Esc>>>i
-vmap <A-S-Right> >gv 
+vmap <A-S-Right> >gv
 
 " Move line left
 " <A-S-Left>
 nmap <A-S-Left> <<
 imap <A-S-Left> <Esc><<i
-vmap <A-S-Left> <gv 
+vmap <A-S-Left> <gv
 
 " Copy line up
 " <C-S-Up>
