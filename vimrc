@@ -176,17 +176,20 @@ function! StyleApply()
     if w:nxStyleMatch_ != ''
       execute ':match None w:nxStyleMatch_'
     endif
+    " Pattern to match trailing whitespace
+    let l:matchTrailingWS = '\s\+$'
     if l:style.columns
       " Pattern to match lines that are too long
       let l:matchTooLong = '\%>'.l:style.columns.'v.\+'
-      " Pattern to match trailing whitespace
-      let l:matchTrailingWS = '\s\+$'
       " Set our match to both lines that are too long and trailing whitespace
       let w:nxStyleMatch_ = '\('.l:matchTooLong.'\|'.l:matchTrailingWS.'\)'
       execute ':match ErrorMsg /' . w:nxStyleMatch_ . '/'
       let &cc = l:style.columns + 1
       let &tw = l:style.columns - 1
     else
+      " Set our match to trailing whitespace
+      let w:nxStyleMatch_ = l:matchTrailingWS
+      execute ':match ErrorMsg /' . w:nxStyleMatch_ . '/'
       let &cc = ''
       let &tw = 0
     endif
