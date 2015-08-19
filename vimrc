@@ -8,21 +8,6 @@ execute "set rtp+=".vundle_root."vundle"
 " start vundle
 call vundle#rc()
 
-" add vundle helper function
-function! BundleNoRTP(githubrepo)
-  let temprtp = &rtp
-  execute "Bundle '".a:githubrepo."'"
-  execute "set rtp=".temprtp
-endfunction
-com! -nargs=+ BundleNoRTP
-\ call BundleNoRTP(<args>)
-
-function! BundleSourceFile(file)
-  execute "source ".g:vundle_root.a:file
-endfunction!
-com! -nargs=+ BundleSourceFile
-\ call BundleSourceFile(<args>)
-
 """""""""""""""""" VUNDLE CONFIGURATION
 " let vundle manage itself
 Bundle 'gmarik/vundle'
@@ -32,15 +17,8 @@ Bundle 'vim-scripts/vcscommand.vim'
 Bundle 'vim-scripts/taglist.vim'
 Bundle 'vim-scripts/Cpp11-Syntax-Support'
 Bundle 'tpope/vim-fugitive'
-" desired complete github repos
 Bundle 'scrooloose/nerdtree'
 "Bundle 'jistr/vim-nerdtree-tabs'
-
-" repos we don't want every plugin from
-"BundleNoRTP 'godlygeek/vim-files'
-" Specific plugins from repos
-"BundleSourceFile 'vim-files/plugin/terminalkeys.vim'
-Bundle 'nacitar/terminalkeys.vim'
 
 """""""""""""""""" END OF VUNDLE CONFIGURATION
 
@@ -87,6 +65,7 @@ set nowritebackup
 "set noswapfile
 
 " Persistent undo
+"
 set undodir=~/.vim/undodir
 set undofile
 set undolevels=1000 "maximum number of changes that can be undone
@@ -134,7 +113,7 @@ let g:nxStyleBase_ = {'useSpace': -1, 'tabWidth': -1, 'columns': -1}
 " Style overrides
 let w:nxStyle_ = { }
 " A place to store custom styles
-let g:StyleFunction = function('StyleFunctionDefault')
+let g:StyleFunction = 'StyleFunctionDefault'
 " Internal; used to keep up with previously applied match patterns
 let w:nxStyleMatch_ = ''
 
@@ -151,10 +130,8 @@ function! StyleApply()
   call StyleWindowInit_()
   " Copy, so we can modify it
   let l:style = copy(g:nxStyleBase_)
-  " If a style function is specified, call it to get style values
-  if g:StyleFunction != function('StyleFunctionDefault')
-    call g:StyleFunction(l:style)
-  endif
+  " Call the style function
+  call function(g:StyleFunction)(l:style)
   " Include global overrides for values.
   call extend(l:style, w:nxStyle_)
   " General settings
@@ -184,13 +161,17 @@ function! StyleApply()
       " Set our match to both lines that are too long and trailing whitespace
       let w:nxStyleMatch_ = '\('.l:matchTooLong.'\|'.l:matchTrailingWS.'\)'
       execute ':match ErrorMsg /' . w:nxStyleMatch_ . '/'
-      let &cc = l:style.columns + 1
+      if exists('+colorcolumn')
+        let &cc = l:style.columns + 1
+      endif
       let &tw = l:style.columns - 1
     else
       " Set our match to trailing whitespace
       let w:nxStyleMatch_ = l:matchTrailingWS
       execute ':match ErrorMsg /' . w:nxStyleMatch_ . '/'
-      let &cc = ''
+      if exists('+colorcolumn')
+        let &cc = ''
+      endif
       let &tw = 0
     endif
   endif
@@ -259,7 +240,7 @@ function! StyleProvider(style)
     endif
   endif
 endfunction
-let g:StyleFunction = function('StyleProvider')
+let g:StyleFunction = 'StyleProvider'
 call StyleMode('personal')
 "call StyleMode('work')
 
@@ -474,7 +455,7 @@ nmap <C-L> <ESC>:NERDTreeToggle<CR>
 nmap <C-K> <ESC>:TlistToggle<CR>
 
 " Call root vimrc if root
-if $USER == "root"
+if $USER == "root" && $SUDO_USER != ""
   " TODO: make this get the home directory
   let $tmp = "/root"
   let $root_vimrc = $tmp . "/.vimrc"
