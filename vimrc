@@ -18,7 +18,7 @@ Bundle 'vim-scripts/taglist.vim'
 Bundle 'vim-scripts/Cpp11-Syntax-Support'
 Bundle 'tpope/vim-fugitive'
 Bundle 'scrooloose/nerdtree'
-"Bundle 'jistr/vim-nerdtree-tabs'
+Bundle 'nacitar/terminalkeys.vim'
 
 """""""""""""""""" END OF VUNDLE CONFIGURATION
 
