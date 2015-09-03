@@ -455,7 +455,7 @@ nmap <C-L> <ESC>:NERDTreeToggle<CR>
 nmap <C-K> <ESC>:TlistToggle<CR>
 
 " Call root vimrc if root
-if $USER == "root" && $SUDO_USER != ""
+if $USER == "root" && $SUDO_USER != "" && $SUDO_USER != "root"
   " TODO: make this get the home directory
   let $tmp = "/root"
   let $root_vimrc = $tmp . "/.vimrc"
