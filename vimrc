@@ -458,8 +458,9 @@ nmap <C-K> <ESC>:TlistToggle<CR>
 if $USER == "root" && $SUDO_USER != "" && $SUDO_USER != "root"
   " TODO: make this get the home directory
   let $tmp = "/root"
-  let $root_vimrc = $tmp . "/.vimrc"
-  if filereadable($root_vimrc)
+  let $root_vimrc = resolve($tmp . "/.vimrc")
+  " If the vimrc is readable, and it isn't THIS file.
+  if $root_vimrc != resolve(expand("<sfile>:p")) && filereadable($root_vimrc)
     source $root_vimrc
   endif
 endif
