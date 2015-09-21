@@ -103,7 +103,8 @@ set ignorecase
 set smartcase
 " When searching, scroll to the next search pattern automatically with 7+ lines visible above and below the cursor
 set scrolloff=7
-
+" Make :E be :Explore
+command E Explore
 
 function! StyleFunctionDefault(style)
 endfunction
