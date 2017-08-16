@@ -19,6 +19,7 @@ Bundle 'vim-scripts/Cpp11-Syntax-Support'
 Bundle 'tpope/vim-fugitive'
 Bundle 'scrooloose/nerdtree'
 Bundle 'nacitar/terminalkeys.vim'
+Bundle 'ARM9/snes-syntax-vim'
 
 """""""""""""""""" END OF VUNDLE CONFIGURATION
 
