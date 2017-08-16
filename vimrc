@@ -221,24 +221,22 @@ function! StyleMode(name)
     echoerr 'Unknown style mode: ' . a:name
   endif
 endfunction
+
 function! StyleProvider(style)
   if !exists('w:styleMode')
     let w:styleMode = ''
   endif
-  if w:styleMode == 'work'
-    call extend(a:style,
-        \{'useSpace': 0, 'tabWidth': 4, 'columns': 0})
-  elseif index(['personal', 'anycol'], w:styleMode) >= 0
-    let a:style.useSpace = 1
-    if &filetype == 'python'
-      let a:style.tabWidth = 4
-    else
-      let a:style.tabWidth = 2
-    endif
-    if w:styleMode == 'anycol'
-      let a:style.columns = 0
-    else
-      let a:style.columns = 80
+  " Defaults ('anycol')
+  call extend(a:style, {'useSpace': 1, 'tabWidth': 2, 'columns': 0})
+  " PEP8/Google guide calls for 4 spaces for python only
+  if &filetype == 'python'
+    let a:style.tabWidth = 4
+  endif
+  if w:styleMode == 'personal'
+    let a:style.columns = 79
+  elseif w:styleMode == 'work'
+    if index(['c', 'cpp', 'cpp11', 'cpp14'], &filetype) >= 0
+      call extend(a:style, {'useSpace': 0, 'tabWidth': 4})
     endif
   endif
 endfunction
